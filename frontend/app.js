@@ -73,6 +73,7 @@ document.getElementById('btn-login').addEventListener('click', async () => {
             document.getElementById('param-e').innerText = data.public_key[0];
             
             loadVault();
+            setTimeout(updateChart, 100); // Initialize chart after container is visible
         } else {
             alert(data.detail);
         }
@@ -208,3 +209,82 @@ function truncate(numStr, len=15) {
     }
     return numStr;
 }
+
+let entropyChart = null;
+
+function updateChart() {
+    const useUpper = document.getElementById('gen-upper').checked;
+    const useLower = document.getElementById('gen-lower').checked;
+    const useDigits = document.getElementById('gen-digits').checked;
+    const useSpecial = document.getElementById('gen-special').checked;
+    
+    let poolSize = 0;
+    if (useLower) poolSize += 26;
+    if (useUpper) poolSize += 26;
+    if (useDigits) poolSize += 10;
+    if (useSpecial) poolSize += 32;
+    if (poolSize === 0) poolSize = 1;
+    
+    const labels = [];
+    const dataPoints = [];
+    
+    for (let l = 8; l <= 32; l++) {
+        labels.push(l);
+        dataPoints.push(Math.pow(poolSize, l));
+    }
+    
+    const ctx = document.getElementById('entropyChart').getContext('2d');
+    
+    if (entropyChart) {
+        entropyChart.data.datasets[0].data = dataPoints;
+        entropyChart.update();
+    } else {
+        entropyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Possible Combinations',
+                    data: dataPoints,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#f8fafc' } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.toExponential(2) + ' combinations';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Password Length', color: '#94a3b8' },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    y: {
+                        type: 'logarithmic',
+                        title: { display: true, text: 'Combinations (Logarithmic Scale)', color: '#94a3b8' },
+                        ticks: { color: '#94a3b8', callback: function(value) { return value.toExponential(0); } },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                }
+            }
+        });
+    }
+}
+
+document.getElementById('gen-len').addEventListener('input', updateChart);
+document.getElementById('gen-upper').addEventListener('change', updateChart);
+document.getElementById('gen-lower').addEventListener('change', updateChart);
+document.getElementById('gen-digits').addEventListener('change', updateChart);
+document.getElementById('gen-special').addEventListener('change', updateChart);
