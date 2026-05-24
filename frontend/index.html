@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Math Password Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+    </div>
+
+    <div class="container" id="auth-container">
+        <div class="glass-panel text-center">
+            <h1>CryptoVault</h1>
+            <p class="subtitle">Secured by Number Theory & Cryptography</p>
+            
+            <div id="setup-view">
+                <h2>Initialize Vault</h2>
+                <div class="edu-box">
+                    <strong><i class="icon">📘</i> Beginner's Concept: One-Way Math & Prime Numbers</strong>
+                    <p><strong>Hashing:</strong> Think of it like a math meat-grinder. When you put your password in, it gets scrambled into random letters. You can't put the scrambled letters back together to find the password. We only store the scramble!</p>
+                    <p style="margin-top: 0.5rem"><strong>Primes:</strong> We also generate two huge <em>Prime Numbers</em> (numbers that only divide by 1 and themselves, like 3 or 7, but massive). These are the secret ingredients for your lock.</p>
+                </div>
+                <input type="password" id="setup-password" placeholder="Master Password" class="premium-input">
+                <button id="btn-setup" class="premium-btn">Generate Keys & Setup</button>
+            </div>
+
+            <div id="login-view" style="display: none;">
+                <h2>Unlock Vault</h2>
+                <div class="edu-box">
+                    <strong><i class="icon">📘</i> Beginner's Concept: Verifying the Scramble</strong>
+                    <p>When you type your password here, we put it through the same "meat-grinder" (Hash). If the new scramble perfectly matches the saved scramble, we know you typed the right password, and we let you in!</p>
+                </div>
+                <input type="password" id="login-password" placeholder="Master Password" class="premium-input">
+                <button id="btn-login" class="premium-btn">Unlock</button>
+                <button id="btn-reset" class="outline-btn w-full m-t-sm" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.5);">Forgot Password? Reset Vault (Deletes All Data)</button>
+            </div>
+            
+            <div id="auth-math" class="math-panel" style="display: none;">
+                <h3>Mathematics Under the Hood</h3>
+                <div class="math-content" id="auth-math-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="vault-container" style="display: none;">
+        <div class="header">
+            <h1>CryptoVault</h1>
+            <button id="btn-logout" class="outline-btn">Lock</button>
+        </div>
+        
+        <div class="grid-2">
+            <!-- Left Column: Math & Generator -->
+            <div class="column">
+                <div class="glass-panel">
+                    <h2>RSA Parameters</h2>
+                    <div class="edu-box">
+                        <strong><i class="icon">📘</i> Beginner's Concept: The Math Lock and Key</strong>
+                        <p>Imagine a padlock that anyone can snap shut, but only you have the key to open. The math equivalent is this: It's super easy to multiply two large prime numbers together (to get 'n'). But if someone only sees 'n', it is practically impossible for them to guess the original two primes. This makes 'n' your public padlock, and the primes your private key!</p>
+                    </div>
+                    <div class="math-panel">
+                        <div><strong>Prime p (Secret):</strong> <span id="param-p" class="mono"></span></div>
+                        <div><strong>Prime q (Secret):</strong> <span id="param-q" class="mono"></span></div>
+                        <div><strong>Modulus n (Public Lock):</strong> <span id="param-n" class="mono"></span></div>
+                        <div><strong>Public Key (e):</strong> <span id="param-e" class="mono"></span></div>
+                    </div>
+                </div>
+
+                <div class="glass-panel m-t">
+                    <h2>Password Generator</h2>
+                    <div class="edu-box">
+                        <strong><i class="icon">📘</i> Beginner's Concept: Combinatorics (Counting)</strong>
+                        <p>How many tries does it take a hacker to guess your password? <strong>Combinatorics</strong> is the math of counting possibilities. If you only use lowercase letters, there are 26 options per character. But if you add uppercase, numbers, and symbols, the options explode! "Entropy" is just a math score showing how unimaginably huge those possibilities are.</p>
+                    </div>
+                    <div class="generator-controls">
+                        <label>Length: <input type="number" id="gen-len" value="16" min="8" max="64"></label>
+                        <label><input type="checkbox" id="gen-upper" checked> Uppercase</label>
+                        <label><input type="checkbox" id="gen-lower" checked> Lowercase</label>
+                        <label><input type="checkbox" id="gen-digits" checked> Digits</label>
+                        <label><input type="checkbox" id="gen-special" checked> Special</label>
+                    </div>
+                    <button id="btn-generate" class="premium-btn w-full m-t-sm">Generate Password</button>
+                    
+                    <div class="gen-result m-t-sm" id="gen-result" style="display:none">
+                        <div class="generated-pw mono" id="gen-pw"></div>
+                        <div class="entropy-stats">
+                            <div>Score (Entropy): <strong id="gen-entropy"></strong> bits</div>
+                            <div>Strength: <strong id="gen-strength"></strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Vault Entries -->
+            <div class="column">
+                <div class="glass-panel">
+                    <h2>Add Password</h2>
+                    <div class="edu-box">
+                        <strong><i class="icon">📘</i> Beginner's Concept: Clock Math (Modulo)</strong>
+                        <p>To encrypt your password, we use "Clock Math". Imagine a clock with 12 hours. If it's 10 o'clock and you add 4 hours, you get 2 o'clock, not 14. We do the same thing, but instead of 12, the clock has trillions of numbers. We spin your password around this giant math clock until it looks completely scrambled.</p>
+                    </div>
+                    <input type="text" id="add-site" placeholder="Website" class="premium-input m-b-sm">
+                    <input type="text" id="add-user" placeholder="Username" class="premium-input m-b-sm">
+                    <input type="password" id="add-pw" placeholder="Password (m)" class="premium-input m-b-sm">
+                    <button id="btn-add" class="premium-btn w-full">Encrypt & Store</button>
+                    
+                    <div id="encrypt-demo" class="math-panel m-t-sm" style="display: none;">
+                        <strong>Scrambled Result:</strong>
+                        <p class="mono" id="encrypt-math-text"></p>
+                    </div>
+                </div>
+
+                <div class="glass-panel m-t" id="vault-list-container">
+                    <h2>Your Vault</h2>
+                    <div class="edu-box">
+                        <strong><i class="icon">📘</i> Beginner's Concept: Unwinding the Clock</strong>
+                        <p>When you want to see your password, we use a special "magic number" (your private key). This number perfectly unwinds the giant math clock backwards, landing exactly on your original password. Without the magic number, a hacker has no idea how far back to spin it!</p>
+                    </div>
+                    <div id="vault-list" class="vault-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
