@@ -225,57 +225,87 @@ function updateChart() {
     if (useSpecial) poolSize += 32;
     if (poolSize === 0) poolSize = 1;
     
+    const bitsPerChar = Math.log2(poolSize);
     const labels = [];
     const dataPoints = [];
+    const currentLen = parseInt(document.getElementById('gen-len').value) || 16;
     
-    for (let l = 8; l <= 32; l++) {
+    for (let l = 1; l <= 32; l++) {
         labels.push(l);
-        dataPoints.push(Math.pow(poolSize, l));
+        dataPoints.push(parseFloat((bitsPerChar * l).toFixed(2)));
     }
     
     const ctx = document.getElementById('entropyChart').getContext('2d');
     
     if (entropyChart) {
         entropyChart.data.datasets[0].data = dataPoints;
+        entropyChart.data.datasets[1].data = labels.map(l => l === currentLen ? bitsPerChar * l : null);
         entropyChart.update();
     } else {
         entropyChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Total Possible Combinations',
-                    data: dataPoints,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                    fill: true,
-                    tension: 0.4
-                }]
+                datasets: [
+                    {
+                        label: 'Entropy (bits)',
+                        data: dataPoints,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 2,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Your Password',
+                        data: labels.map(l => l === currentLen ? bitsPerChar * l : null),
+                        borderColor: '#22c55e',
+                        backgroundColor: '#22c55e',
+                        pointRadius: 8,
+                        pointStyle: 'star',
+                        showLine: false
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { labels: { color: '#f8fafc' } },
+                    title: {
+                        display: true,
+                        text: 'How Password Length Affects Security',
+                        color: '#f8fafc',
+                        font: { size: 14, family: 'Outfit' }
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.raw.toExponential(2) + ' combinations';
+                                const bits = context.raw;
+                                if (bits === null) return '';
+                                let strength = 'Very Weak';
+                                if (bits >= 128) strength = 'Excellent';
+                                else if (bits >= 80) strength = 'Strong';
+                                else if (bits >= 60) strength = 'Good';
+                                else if (bits >= 40) strength = 'Moderate';
+                                return `${bits.toFixed(1)} bits — ${strength}`;
                             }
                         }
-                    }
+                    },
+                    annotation: {}
                 },
                 scales: {
                     x: {
-                        title: { display: true, text: 'Password Length', color: '#94a3b8' },
+                        title: { display: true, text: 'Password Length (characters)', color: '#94a3b8', font: { family: 'Outfit' } },
                         ticks: { color: '#94a3b8' },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        grid: { color: 'rgba(255,255,255,0.05)' }
                     },
                     y: {
-                        type: 'logarithmic',
-                        title: { display: true, text: 'Combinations (Logarithmic Scale)', color: '#94a3b8' },
-                        ticks: { color: '#94a3b8', callback: function(value) { return value.toExponential(0); } },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        title: { display: true, text: 'Entropy (bits) — higher = harder to crack', color: '#94a3b8', font: { family: 'Outfit' } },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        beginAtZero: true
                     }
                 }
             }
